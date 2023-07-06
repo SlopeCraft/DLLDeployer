@@ -10,7 +10,7 @@ function(DLLD_private_add_test_is_system_dll filename)
   endif ()
 endfunction()
 
-DLLD_private_add_test_is_system_dll(MSVCRT.dll)
+DLLD_private_add_test_is_system_dll(C:/Windows/System32/MSVCRT.dll)
 DLLD_private_add_test_is_system_dll(zip.dll)
 DLLD_private_add_test_is_system_dll(api-ms-win-crt-time-l1-1-0.dll)
 DLLD_private_add_test_is_system_dll(vcruntime140.dll)
