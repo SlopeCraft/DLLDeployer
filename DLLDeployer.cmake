@@ -5,6 +5,9 @@ if (NOT ${WIN32})
   return()
 endif ()
 
+message("CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
+
+
 # Tells if the given file is a dll
 function(DLLD_is_dll library_file out_var_name)
   cmake_path(GET library_file EXTENSION extension)
@@ -57,9 +60,39 @@ function(DLLD_get_location target result_var_name)
     set(${result_var_name} ${target} PARENT_SCOPE)
   endif ()
 endfunction()
+if(NOT DEFINED DLLD_msvc_utils)
+  if(${MSVC})
+    # if the compiler is msvc-like use msvc utils
+    set(DLLD_msvc_utils_default_val ON)
+  else()
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU")
+      # gcc
+      set(DLLD_msvc_utils_default_val OFF)
+    endif ()
+
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang")
+      cmake_path(GET CMAKE_CXX_COMPILER PARENT_PATH compiler_prefix)
+      cmake_path(GET compiler_prefix PARENT_PATH compiler_prefix)
+
+      if(EXISTS ${compiler_prefix}/bin/c++.exe)
+        # Clang with mingw abi
+        set(DLLD_msvc_utils_default_val OFF)
+      else ()
+        # clang-msvc with gnu-like command line
+        set(DLLD_msvc_utils_default_val ON)
+      endif ()
+    endif ()
 
 
-if (${MSVC})
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "MSVC")
+      set(DLLD_msvc_utils_default_val ON)
+    endif ()
+  endif ()
+
+endif ()
+option(DLLD_msvc_utils "Use msvc utils" ${DLLD_msvc_utils_default_val})
+
+if (${DLLD_msvc_utils})
   find_program(DLLD_msvc_lib_exe NAMES lib)
   find_program(DLLD_msvc_dumpbin_exe NAMES dumpbin)
 
