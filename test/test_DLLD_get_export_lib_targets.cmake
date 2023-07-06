@@ -3,7 +3,7 @@ message(STATUS "Testing DLLD_get_export_lib_targets")
 function(DLLD_private_add_test lib_name)
   DLLD_library_type(${lib_name} type)
   message("Type of ${lib_name} is : ${type}")
-  DLLD_deploy_lib(${lib_name} bin INSTALL_SYSTEM_DLL)
+  DLLD_deploy_lib(${lib_name} bin)
 endfunction()
 
 
