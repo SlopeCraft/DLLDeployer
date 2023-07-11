@@ -5,72 +5,95 @@ A cmake script to deploy dlls during installation and packaging.
 ## Usage:
 ```cmake
 include(DLLDeployer.cmake)
+
+add_executable(test ...)
+target_link_libraries(test PRIVATE ...)
+
+# Deploy dlls at binary dir, but not automatically
+DLLD_add_deploy(test BUILD_MODE)
+# Automatically
+DLLD_add_deploy(test BUILD_MODE ALL)
+
+# Deploy dlls at installation prefix
+DLLD_add_deploy(test INSTALL_MODE INSTALL_DESTINATION bin)
 ```
 
 ## Documentation:
+
+### Main function:
+1. `DLLD_add_deploy(target_name)`
+
+    This function is used to deploy required dlls for an executable target.
+
+    The complete function prototype is:
+    ```cmake
+    DLLD_add_deploy(target_name 
+    [BUILD_MODE] [ALL]
+    [INSTALL_MODE] [INSTALL_DESTINATION])
+    ```
+   
+    `DLLD_add_deploy` can work in two modes: build mode and install mode. In the **build mode**, it deploys dlls to the binary dir where your executable is compiled, and in the **install mode**, it deploys dlls in the installation dir.
+
+#### Build mode
+
+In build mode,
+this function will create a custom target named `DLLD_deploy_for_${target_name}` to execute during compilation.
+If `ALL` is assigned, the custom target will be built if you run `cmake --build .`. 
+
+Another custom target `DLLD_deploy_all` will be also added. If you build this target, all custom targets that are created by `DLLD_add_deploy` will be built automatically.
+
+#### Install mode
+
+In the install mode, you must the installation prefix of `${target_name}` to `INSTALL_DESTINATION`,
+otherwise DLLDeployer will not be able to find the installed executable.
+
+It's strongly recommended to pass installation prefix in a **relative path**, because installation not only happens when you run `cmake --install .`, but also when you run `cpack -G ...`,
+using an absolute path will stop DllDeployer for deploying dlls correctly when cpack is working.
+
+### Internal functions:
+
 1. `DLLD_is_dll(library_file out_var_name)`
 
    Tells if the given file is a dll.
 2. `DLLD_is_system_dll(lib_file out_var_name)`
 
-   Tells if the given file is a system library.
-3. `DLLD_get_location(target result_var_name)`
+   Tells if the given file is a system dll.
 
-    Get the location of `${target}`. 
+3. `DLLD_get_dll_dependents_norecurse(dll_file result_var_name)`
+    
+    Get direct dependents of a dll. This function is implemented with binary utils.
 
-    If the `${target}` is a target, return its location; otherwise `${target}` is considered to be a file, the function will return `${target}`.
-
-4. `DLLD_get_export_lib_targets(export_lib_file link_targets_out_var_name)`
-   
-    List all corresponding DLLs of an export library, for example, `zlib.dll.a`.
-
-    This function will retrieve binary information of `${export_lib_file}` with binary utils supplied by the compiler tool chain(`lib.exe` for msvc-like and `objump.exe` for mingw-like), and stores the directly required libraries to `link_targets_out_var_name`.
-
-    Usually one export lib corresponds to only one dynamic lib.
-
-5. `DLLD_get_dll_dependents(dll_file result_var_name)`
+4. `DLLD_get_dll_dependents(dll_file result_var_name)`
 
     Get runtime dependents of a dll. All dependents of `${dll_file}` will be stored as a list in `${result_var_name}`
 
-    This function is also implemented with binary utils. 
-
-6. `DLLD_library_type(lib_file type_out_var_name)`
-
-    Find the type of `${lib_file}` and store it into `type_out_var_name`.
-
-    Possible results: `unknown`, `dynamic_lib`, `static_lib`, `export_lib`
-   1. `unknown` means that we can not deduce the type of `${lib_file}`. It may be an interface target, or even not an executable.
-   2. `dynamic_lib` refers to dlls.
-   3. `static_lib` refers to real static libs, but not export libs of a dynamic lib.
-   4. `export_lib` refers to export libs of dynamic libs.
-
-7. `DLLD_deploy_dll(dll_location destination)`
-
-    Install a dll and its dependents. By default, this function will install `${dll_location}` to `${destination}` by `install(FILES ...)`, and then go through all its dependents **recursively**. All dlls required will be installed in the same way, except system dlls.
-
-    The full function prototype is:
+    The complete function prototype is: 
     ```cmake
-    DLLD_deploy_dll(dll_location destination
-      NO_RECURSE
-      INSTALL_SYSTEM_DLL)
+    DLLD_get_dll_dependents(dll_file result_var_name
+    [RECURSE]
+    [SKIP_SYSTEM_DLL])
     ```
-    You can add extra parameters to control the behavior of this function.
-    1. `NO_RECURSE` will stop the function from searching and installing dependents recursively, ony the given dll will be installed.
-    2. `INSTALL_SYSTEM_DLL` will enable the function to install system dlls. Note that this function will never deploy dependents for system dlls. As a result, only directly used system dlls will be deployed, and we won't worry about copying the whole system to the installation prefix.
+    
+    Passing `RECURSE` will search recursively to get all dlls required.
 
-8. `DLLD_deploy_lib(target destination)`
+    Passing `SKIP_SYSTEM_DLL` will remove system dlls for the result.
 
-    Install required dlls for `${target}`
+5. `DLLD_get_exe_dependents(exe_file result_var_name)`
+    
+    Get runtime dependents of an exe. This is implemented by searching recursively with the previous function.
 
-    The full function prototype is:
+6. `DLLD_deploy_runtime(file_location)`
+    
+    Deploy dlls for a `${file_location}`, expected existing file.
+
+    The complete function prototype is: 
     ```cmake
-    DLLD_deploy_lib(target destination
-      NO_RECURSE
-      INSTALL_SYSTEM_DLL)
+    DLLD_deploy_runtime(file_location
+    [COPY] [INSTALL]
+    [DESTINATION]...)
     ```
-    This function will check the type of `${target}`. 
-    - If `${target}` is a dynamic lib, the lib and all its dll dependent will be installed to `${destination}` .
-    - If `${target}` is an export lib, the related dynamic lib will be installed like the previous line.
-    - If `${target}` is a static lib, object file, interface target or an executable, nothing will be done.
-
-    All extra flags have the same effect as to `DLLD_deploy_dll`.
+   
+    - If `COPY` is used, all required dlls will be deployed immediately in the same dir of `${file_location}`.
+    - If `INSTALL` is used, all required dlls will be deployed when you run `cmake --install ...`. You must assign the destination via `DESTINATION` parameter.
+      - `COPY` and `INSTALL` can work individually.
+      - `COPY` copies files with `file(COPY ...)`, so it's done immediately; but `INSTALL` does it with `install(FILES ... DESTINATION ...)`, **so copying will take place when the whole project is being installed and packed**.
