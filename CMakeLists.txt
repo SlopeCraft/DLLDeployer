@@ -26,7 +26,7 @@ target_link_libraries(test PRIVATE OpenMP::OpenMP_CXX)
 
 install(TARGETS test
     RUNTIME DESTINATION bin)
-DLLD_deploy_for_target(test BUILD_MODE ALL)
-DLLD_deploy_for_target(test INSTALL_MODE INSTALL_DESTINATION bin)
+DLLD_add_deploy(test BUILD_MODE ALL)
+DLLD_add_deploy(test INSTALL_MODE INSTALL_DESTINATION bin)
 
 include(CPack)

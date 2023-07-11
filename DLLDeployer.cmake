@@ -40,7 +40,7 @@ if (NOT ${DLLD_configure_time})
     set(ENV{Path} "@DLLD_env_path@")
 
     option(DLLD_install_mode "Run with install mode" ON)
-    set(DLLD_install_prefix @DLLD_deploy_for_target_INSTALL_DESTINATION@)
+    set(DLLD_install_prefix @DLLD_add_deploy_INSTALL_DESTINATION@)
     #message(WARNING "CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 else ()
     set(DLLDeployer_script_file ${CMAKE_CURRENT_LIST_FILE}
@@ -321,9 +321,9 @@ endfunction()
 
 #message("CMAKE_CURRENT_LIST_FILE = ${CMAKE_CURRENT_LIST_FILE}")
 
-#message(WARNING "Function DLLD_deploy_for_target is not finished. No way to get the filename of this script")
-function(DLLD_deploy_for_target target_name)
-    cmake_parse_arguments(DLLD_deploy_for_target
+#message(WARNING "Function DLLD_add_deploy is not finished. No way to get the filename of this script")
+function(DLLD_add_deploy target_name)
+    cmake_parse_arguments(DLLD_add_deploy
         "BUILD_MODE;INSTALL_MODE;ALL" "INSTALL_DESTINATION" "" ${ARGN})
 
     #get_target_property(target_prefix ${target_name} PREFIX)
@@ -340,9 +340,9 @@ function(DLLD_deploy_for_target target_name)
         ${DLLD_configured_script_file}
         @ONLY)
 
-    if (${DLLD_deploy_for_target_BUILD_MODE})
+    if (${DLLD_add_deploy_BUILD_MODE})
 
-        if (${DLLD_deploy_for_target_ALL})
+        if (${DLLD_add_deploy_ALL})
             set(DLLD_all_tag ALL)
         else ()
             set(DLLD_all_tag)
@@ -363,25 +363,25 @@ function(DLLD_deploy_for_target target_name)
         add_dependencies(${custom_target_name}
             DLLD_deploy_all)
     else ()
-        if(DLLD_deploy_for_target_ALL)
+        if(DLLD_add_deploy_ALL)
             message(FATAL_ERROR "\"ALL\" can only be assigned for BUILD_MODE")
         endif ()
 
     endif ()
 
-    if (${DLLD_deploy_for_target_INSTALL_MODE})
-        message("DLLD_deploy_for_target_INSTALL_DESTINATION = ${DLLD_deploy_for_target_INSTALL_DESTINATION}")
-        if(NOT DEFINED DLLD_deploy_for_target_INSTALL_DESTINATION)
+    if (${DLLD_add_deploy_INSTALL_MODE})
+        message("DLLD_add_deploy_INSTALL_DESTINATION = ${DLLD_add_deploy_INSTALL_DESTINATION}")
+        if(NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")
         endif ()
 
-        cmake_path(IS_ABSOLUTE DLLD_deploy_for_target_INSTALL_DESTINATION is_destination_abs)
+        cmake_path(IS_ABSOLUTE DLLD_add_deploy_INSTALL_DESTINATION is_destination_abs)
         if(${is_destination_abs})
             message(FATAL_ERROR "Value passed to INSTALL_DESTINATION must be relative path, for example: \"bin\".")
         endif ()
 
         install(SCRIPT ${DLLD_configured_script_file}
-            DESTINATION ${DLLD_deploy_for_target_INSTALL_DESTINATION})
+            DESTINATION ${DLLD_add_deploy_INSTALL_DESTINATION})
     endif ()
 
 endfunction()
