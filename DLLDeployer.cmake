@@ -11,7 +11,7 @@ else ()
 endif ()
 
 if (NOT ${WIN32})
-    message(STATUS "This project is designed to deploy dll on windows.")
+    message(FATAL_ERROR "This project is designed to deploy dll on windows.")
     return()
 endif ()
 
@@ -357,12 +357,18 @@ function(DLLD_add_deploy target_name)
             COMMENT "Deploy dlls for target ${target_name}"
             )
 
+        set(QD_custom_target_name "QD_deploy_for_${target_executable}")
+        if(TARGET ${QD_custom_target_name})
+            # DLLD deploying must run after windeployqt
+            add_dependencies(${custom_target_name} ${QD_custom_target_name})
+        endif ()
+
         if (NOT TARGET DLLD_deploy_all)
             add_custom_target(DLLD_deploy_all
                 COMMENT "Deploy dlls for all targets")
         endif ()
-        add_dependencies(${custom_target_name}
-            DLLD_deploy_all)
+        add_dependencies(DLLD_deploy_all
+            ${custom_target_name})
     else ()
         if(DLLD_add_deploy_ALL)
             message(FATAL_ERROR "\"ALL\" can only be assigned for BUILD_MODE")
@@ -370,7 +376,7 @@ function(DLLD_add_deploy target_name)
     endif ()
     # Install mode
     if (${DLLD_add_deploy_INSTALL_MODE})
-        message("DLLD_add_deploy_INSTALL_DESTINATION = ${DLLD_add_deploy_INSTALL_DESTINATION}")
+        #message("DLLD_add_deploy_INSTALL_DESTINATION = ${DLLD_add_deploy_INSTALL_DESTINATION}")
         if(NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")
         endif ()
