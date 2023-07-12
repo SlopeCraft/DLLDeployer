@@ -357,7 +357,7 @@ function(DLLD_add_deploy target_name)
             COMMENT "Deploy dlls for target ${target_name}"
             )
 
-        set(QD_custom_target_name "QD_deploy_for_${target_executable}")
+        set(QD_custom_target_name "QD_deploy_for_${target_name}")
         if(TARGET ${QD_custom_target_name})
             # DLLD deploying must run after windeployqt
             add_dependencies(${custom_target_name} ${QD_custom_target_name})
