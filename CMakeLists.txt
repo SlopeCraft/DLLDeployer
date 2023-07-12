@@ -31,19 +31,22 @@ find_package(OpenMP REQUIRED)
 target_link_libraries(test PRIVATE OpenMP::OpenMP_CXX)
 
 find_package(Qt6 6.4.0
-    COMPONENTS Core
+    COMPONENTS Core Widgets
     REQUIRED)
-target_link_libraries(test PRIVATE Qt6::Core)
+target_link_libraries(test PRIVATE Qt6::Core Qt6::Widgets)
+set_target_properties(test PROPERTIES
+    WIN32_EXECUTABLE ON)
 
 install(TARGETS test
     RUNTIME DESTINATION bin)
+
+QD_add_deployqt(test
+    BUILD_MODE ALL
+    INSTALL_MODE INSTALL_DESTINATION bin
+    FLAGS -no-translations;-release)
+
 DLLD_add_deploy(test BUILD_MODE ALL)
 DLLD_add_deploy(test INSTALL_MODE INSTALL_DESTINATION bin)
 
-QD_add_deployqt(test
-    BUILD_MODE
-    ALL
-    INSTALL_MODE INSTALL_DESTINATION bin
-    FLAGS -no-translations)
 
 include(CPack)

@@ -2,10 +2,14 @@
 #include <zip.h>
 #include <iostream>
 #include <QCoreApplication>
+#include <QMainWindow>
 
 int main(int argc,char**argv) {
 
   QCoreApplication qapp{argc,argv};
+
+  QMainWindow wind;
+  wind.show();
 
   omp_set_num_threads(20);
 
@@ -13,5 +17,5 @@ int main(int argc,char**argv) {
 
   std::cout<<"DLLDeployer!"<<std::endl;
 
-  return 0;
+  return qapp.exec();
 }
