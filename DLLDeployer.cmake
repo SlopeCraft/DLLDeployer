@@ -358,7 +358,7 @@ function(DLLD_add_deploy target_name)
             )
 
         set(QD_custom_target_name "QD_deploy_for_${target_name}")
-        if(TARGET ${QD_custom_target_name})
+        if (TARGET ${QD_custom_target_name})
             # DLLD deploying must run after windeployqt
             add_dependencies(${custom_target_name} ${QD_custom_target_name})
         endif ()
@@ -370,19 +370,19 @@ function(DLLD_add_deploy target_name)
         add_dependencies(DLLD_deploy_all
             ${custom_target_name})
     else ()
-        if(DLLD_add_deploy_ALL)
+        if (DLLD_add_deploy_ALL)
             message(FATAL_ERROR "\"ALL\" can only be assigned for BUILD_MODE")
         endif ()
     endif ()
     # Install mode
     if (${DLLD_add_deploy_INSTALL_MODE})
         #message("DLLD_add_deploy_INSTALL_DESTINATION = ${DLLD_add_deploy_INSTALL_DESTINATION}")
-        if(NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
+        if (NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")
         endif ()
 
         cmake_path(IS_ABSOLUTE DLLD_add_deploy_INSTALL_DESTINATION is_destination_abs)
-        if(${is_destination_abs})
+        if (${is_destination_abs})
             message(FATAL_ERROR "Value passed to INSTALL_DESTINATION must be relative path, for example: \"bin\".")
         endif ()
 
@@ -395,11 +395,11 @@ endfunction()
 if (NOT ${DLLD_configure_time})
     #cmake_path(GET DLLD_this_script_file PARENT_PATH parent_path)
 
-#    if(NOT parent_path STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-#        message(FATAL_ERROR "This code is expected to run at ${parent_path}, but current running at ${CMAKE_CURRENT_SOURCE_DIR}")
-#    endif ()
+    #    if(NOT parent_path STREQUAL CMAKE_CURRENT_SOURCE_DIR)
+    #        message(FATAL_ERROR "This code is expected to run at ${parent_path}, but current running at ${CMAKE_CURRENT_SOURCE_DIR}")
+    #    endif ()
 
-    if(NOT ${DLLD_install_mode})
+    if (NOT ${DLLD_install_mode})
         # Deploy dlls directly in current dir
         message(STATUS "Deploying dlls for ${DLLD_filename}")
         #message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
