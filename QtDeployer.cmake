@@ -89,7 +89,7 @@ function(QD_add_deployqt target_executable)
 
         add_custom_target(${custom_target_name}
             ${QD_all_tag}
-            COMMAND cmake -DQD_install_mode:BOOL=FALSE -DQD_working_dir:FILEPATH=${CMAKE_CURRENT_BINARY_DIR} -P ${QD_configured_script_file}
+            COMMAND ${CMAKE_COMMAND} -DQD_install_mode:BOOL=FALSE -DQD_working_dir:FILEPATH=${CMAKE_CURRENT_BINARY_DIR} -P ${QD_configured_script_file}
             DEPENDS ${target_executable}
             COMMENT "Run windeployqt for target ${target_executable}")
         set(DLLD_target_name "DLLD_deploy_for_${target_executable}")
@@ -128,9 +128,10 @@ function(QD_add_deployqt target_executable)
 endfunction()
 
 if (NOT ${QD_configure_time})
+
     if (QD_install_mode)
         message(STATUS "Running ${QD_this_script_file} indirectly...")
-        execute_process(COMMAND cmake -DQD_install_mode:BOOL=OFF -DQD_working_dir:FILEPATH=${CMAKE_INSTALL_PREFIX}/${QD_install_prefix} -P ${QD_this_script_file}
+        execute_process(COMMAND ${CMAKE_COMMAND} -DQD_install_mode:BOOL=OFF -DQD_working_dir:FILEPATH=${CMAKE_INSTALL_PREFIX}/${QD_install_prefix} -P ${QD_this_script_file}
             COMMAND_ERROR_IS_FATAL ANY)
         return()
     endif ()

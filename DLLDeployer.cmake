@@ -351,7 +351,7 @@ function(DLLD_add_deploy target_name)
 
         add_custom_target(${custom_target_name}
             ${DLLD_all_tag}
-            COMMAND cmake -DDLLD_install_mode:BOOL=false -P ${DLLD_configured_script_file}
+            COMMAND ${CMAKE_COMMAND} -DDLLD_install_mode:BOOL=false -P ${DLLD_configured_script_file}
             WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
             DEPENDS ${target_name}
             COMMENT "Deploy dlls for target ${target_name}"
@@ -413,7 +413,7 @@ if (NOT ${DLLD_configure_time})
         # Run this script in another location(installation prefix)
         # This is necessary because although the script is installed by install(SCRIPT ... DESTINATION...), the execution directory is still the same dir of the configured script.
         message(STATUS "Running ${DLLD_this_script_file} indirectly...")
-        execute_process(COMMAND cmake -DDLLD_install_mode:BOOL=false -P ${DLLD_this_script_file}
+        execute_process(COMMAND ${CMAKE_COMMAND} -DDLLD_install_mode:BOOL=false -P ${DLLD_this_script_file}
             WORKING_DIRECTORY "${CMAKE_INSTALL_PREFIX}/${DLLD_install_prefix}"
             COMMAND_ERROR_IS_FATAL ANY)
     endif ()
