@@ -12,6 +12,8 @@ include(DLLDeployer.cmake)
 
 add_executable(test ...)
 target_link_libraries(test PRIVATE ...)
+install(TARGETS test
+    RUNTIME DESTINATION bin)
 
 # Deploy dlls at binary dir, but not automatically
 DLLD_add_deploy(test BUILD_MODE)
