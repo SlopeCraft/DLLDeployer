@@ -93,11 +93,14 @@ jobs:
       #  # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
 
       - name: Install
-        run: cmake --install ${{github.workspace}}
+        run: |
+          cd /d ${{github.workspace}}/build
+          cmake --install .
 
       - name: CPack
         run: |
-          cpack ${{github.workspace}}/build -G 7Z 
+          cd /d ${{github.workspace}}/build
+          cpack -G 7Z 
 
       - name: Upload
         uses: actions/upload-artifact@v3
