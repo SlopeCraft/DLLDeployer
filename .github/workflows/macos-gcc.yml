@@ -1,4 +1,4 @@
-name: Windows-test
+name: macos-gcc
 
 on:
   push:
