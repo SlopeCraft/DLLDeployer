@@ -34,10 +34,17 @@ install(TARGETS test
     BUNDLE DESTINATION bin)
 
 if(${Qt6_FOUND})
-QD_add_deployqt(test
-    BUILD_MODE ALL
-    INSTALL_MODE INSTALL_DESTINATION bin
-    FLAGS -no-translations)
+    if(${APPLE})
+        QD_add_deployqt(test
+            INSTALL_MODE INSTALL_DESTINATION bin
+            FLAGS -no-translations)
+    else ()
+        QD_add_deployqt(test
+            BUILD_MODE ALL
+            INSTALL_MODE INSTALL_DESTINATION bin
+            FLAGS -no-translations)
+    endif ()
+
 endif ()
 
 if(${WIN32})

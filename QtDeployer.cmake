@@ -91,6 +91,10 @@ function(QD_add_deployqt target_executable)
         @ONLY)
 
     if (${QD_add_deployqt_BUILD_MODE})
+        if (${APPLE})
+            message(WARNING "BUILD_MODE can not be used on apple because no macos bundle will be generated during compilation.")
+        endif ()
+
         set(custom_target_name "QD_deploy_for_${target_executable}")
         if (${QD_add_deployqt_ALL})
             set(QD_all_tag ALL)
@@ -148,12 +152,12 @@ if (NOT ${QD_configure_time})
         return()
     endif ()
 
-#    set(exe_location "${QD_working_dir}/${QD_target_executable_filename}")
-#    if (NOT EXISTS ${exe_location})
-#        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
-#    endif ()
+    #    set(exe_location "${QD_working_dir}/${QD_target_executable_filename}")
+    #    if (NOT EXISTS ${exe_location})
+    #        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
+    #    endif ()
 
-    message("Running windeployqt/macdeployqt at ${QD_working_dir}")
+    message(STATUS "Running windeployqt/macdeployqt at ${QD_working_dir}")
     execute_process(COMMAND ${QD_deployqt_exe} ${QD_target_executable_filename} ${QD_flags}
         WORKING_DIRECTORY ${QD_working_dir}
         COMMAND_ERROR_IS_FATAL ANY)
