@@ -148,10 +148,10 @@ if (NOT ${QD_configure_time})
         return()
     endif ()
 
-    set(exe_location "${QD_working_dir}/${QD_target_executable_filename}")
-    if (NOT EXISTS ${exe_location})
-        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
-    endif ()
+#    set(exe_location "${QD_working_dir}/${QD_target_executable_filename}")
+#    if (NOT EXISTS ${exe_location})
+#        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
+#    endif ()
 
     message("Running windeployqt/macdeployqt at ${QD_working_dir}")
     execute_process(COMMAND ${QD_deployqt_exe} ${QD_target_executable_filename} ${QD_flags}
