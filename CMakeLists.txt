@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(DLLDeployer LANGUAGES C CXX)
+project(DLLDeployer LANGUAGES C CXX VERSION 0.2)
 
 if(NOT CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
     message(STATUS "DLLDeployer is added as a subproject, no tests will be added")
