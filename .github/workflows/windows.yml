@@ -32,11 +32,15 @@ jobs:
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
       run: |
         "C:/Program Files/Microsoft Visual Studio/2022/Enterprise/VC/Auxiliary/Build/vcvars64.bat"
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl
+        mkdir build install
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_C_COMPILER=cl -DCMAKE_CXX_COMPILER=cl -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/install
 
     - name: Build
+      shell: cmd
       # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build
+      run: |
+        cd /d ${{github.workspace}}/build
+        cmake --build .
 
     #- name: Test
     #  working-directory: ${{github.workspace}}/build
