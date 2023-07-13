@@ -13,26 +13,29 @@ include(QtDeployer.cmake)
 
 add_executable(test main.cpp)
 
-find_package(libzip REQUIRED)
+find_package(libzip CONFIG REQUIRED)
 target_link_libraries(test PRIVATE libzip::zip)
 
 find_package(OpenMP REQUIRED)
 target_link_libraries(test PRIVATE OpenMP::OpenMP_CXX)
 
 find_package(Qt6 6.4.0
-    COMPONENTS Core Widgets
-    REQUIRED)
-target_link_libraries(test PRIVATE Qt6::Core Qt6::Widgets)
-set_target_properties(test PROPERTIES
-    WIN32_EXECUTABLE ON)
+    COMPONENTS Core Widgets)
+if(NOT ${Qt6_FOUND})
+    target_link_libraries(test PRIVATE Qt6::Core Qt6::Widgets)
+    set_target_properties(test PROPERTIES
+        WIN32_EXECUTABLE ON)
+endif ()
 
 install(TARGETS test
     RUNTIME DESTINATION bin)
 
+if(NOT ${Qt6_FOUND})
 QD_add_deployqt(test
     BUILD_MODE ALL
     INSTALL_MODE INSTALL_DESTINATION bin
     FLAGS -no-translations)
+endif ()
 
 if(${WIN32})
     DLLD_add_deploy(test
