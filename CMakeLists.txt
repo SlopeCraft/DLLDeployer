@@ -25,7 +25,10 @@ if(${Qt6_FOUND})
     target_link_libraries(test PRIVATE Qt6::Core Qt6::Widgets)
     set_target_properties(test PROPERTIES
         WIN32_EXECUTABLE ON
-        MACOS_BUNDLE ON)
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.ToKiNoBug.SlopeCraft"
+        MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+        MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+        MACOSX_BUNDLE TRUE)
     target_compile_definitions(test PRIVATE QT_SUPPORT)
 endif ()
 
