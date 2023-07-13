@@ -22,7 +22,7 @@ jobs:
 
     - name: Install deps
       run: |
-        brew install zlib zstd libzip qt@6
+        brew install zlib zstd libzip qt@6 ninja
 
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
