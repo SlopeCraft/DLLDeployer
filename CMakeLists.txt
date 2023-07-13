@@ -24,7 +24,8 @@ find_package(Qt6 6.4.0
 if(${Qt6_FOUND})
     target_link_libraries(test PRIVATE Qt6::Core Qt6::Widgets)
     set_target_properties(test PROPERTIES
-        WIN32_EXECUTABLE ON)
+        WIN32_EXECUTABLE ON
+        MACOS_BUNDLE ON)
     target_compile_definitions(test PRIVATE QT_SUPPORT)
 endif ()
 
