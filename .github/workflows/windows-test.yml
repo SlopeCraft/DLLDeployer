@@ -64,6 +64,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: check gcc
+        run: |
+          where gcc
+          gcc --version
+
       - name: Install deps
         shell: cmd
         run: |
