@@ -48,7 +48,8 @@ jobs:
       
     - name: CPack
       run: |
-        cpack ${{github.workspace}}/build -G 7Z 
+        cd ${{github.workspace}}/build
+        cpack -G 7Z 
     
     - name: Upload
       uses: actions/upload-artifact@v3
