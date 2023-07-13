@@ -50,6 +50,7 @@ else ()
         CACHE FILEPATH "This cmake script")
     set(DLLD_env_path $ENV{Path})                                       # Convert backslash in path to slash
     DLLD_replace_backslash(DLLD_env_path DLLD_env_path)
+    DLLD_replace_backslash(CMAKE_PREFIX_PATH CMAKE_PREFIX_PATH)
 endif ()
 
 

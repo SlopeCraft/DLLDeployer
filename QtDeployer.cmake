@@ -50,6 +50,7 @@ else ()
         CACHE FILEPATH "This cmake script")
     set(QD_env_path $ENV{Path})                                         # Convert backslash in path to slash
     QD_replace_backslash(QD_env_path QD_env_path)
+    QD_replace_backslash(CMAKE_PREFIX_PATH CMAKE_PREFIX_PATH)
 endif ()
 
 function(QD_add_deployqt target_executable)
