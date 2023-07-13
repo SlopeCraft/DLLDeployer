@@ -147,6 +147,11 @@ if (${DLLD_msvc_utils})
         if (NOT DLLD_msvc_dumpbin_exe)
             message(FATAL_ERROR "dumpbin.exe is not found on this computer, but you are using a msvc-like compiler, please install msvc and make sure the environment variables are initialized for msvc.")
         endif ()
+
+        if(NOT EXISTS ${dll_file})
+            message(FATAL_ERROR "Given dll file \"${dll_file}\" doesn't exist.")
+        endif ()
+
         # dumpbin /dependents xxx.dll
         execute_process(COMMAND ${DLLD_msvc_dumpbin_exe} /dependents ${dll_file}
             OUTPUT_VARIABLE lib_output
@@ -325,7 +330,6 @@ function(DLLD_add_deploy target_name)
     #get_target_property(target_prefix ${target_name} PREFIX)
     get_target_property(target_prop_name ${target_name} NAME)
     #get_target_property(target_suffix ${target_name} PREFIX)
-
     set(filename "${target_prop_name}.exe")
 
     set(custom_target_name "DLLD_deploy_for_${target_name}")
