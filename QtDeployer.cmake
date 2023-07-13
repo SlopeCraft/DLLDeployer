@@ -8,8 +8,8 @@ else ()
 endif ()
 
 
-if (NOT ${WIN32})
-    message(WARNING "This project is designed to deploy dll on windows.")
+if (NOT (${WIN32} OR ${Darwin}))
+    message(WARNING "This project is designed to deploy dll on windows or macOS.")
     return()
 endif ()
 
@@ -25,7 +25,7 @@ endfunction()
 
 
 if (NOT ${QD_configure_time})
-    set(QD_deployqt_exe @QD_deployqt_exe@)
+    set(QD_deployqt_exe @QD_deployqt_exe@)                              # The windeployqt.exe(or macdeployqt)
     set(CMAKE_C_COMPILER "@CMAKE_C_COMPILER@")                          # C compiler
     set(CMAKE_CXX_COMPILER "@CMAKE_CXX_COMPILER@")                      # C++ compiler
     set(CMAKE_CXX_COMPILER_ID "@CMAKE_CXX_COMPILER_ID@")                # C++ compiler id
@@ -61,9 +61,15 @@ function(QD_add_deployqt target_executable)
         message(FATAL_ERROR "\"${target_executable}\" is not an executable")
     endif ()
 
-    find_program(QD_deployqt_exe
-        NAMES windeployqt
-        REQUIRED)
+    if (${WIN32})
+        find_program(QD_deployqt_exe
+            NAMES windeployqt
+            REQUIRED)
+    else ()
+        find_program(QD_deployqt_exe
+            NAMES macdeployqt
+            REQUIRED)
+    endif ()
 
     cmake_parse_arguments(QD_add_deployqt
         "BUILD_MODE;INSTALL_MODE;ALL"
@@ -72,7 +78,11 @@ function(QD_add_deployqt target_executable)
         ${ARGN})
 
     get_target_property(target_prop_name ${target_executable} NAME)
-    set(QD_target_executable_filename "${target_prop_name}.exe")
+    if (${WIN32})
+        set(QD_target_executable_filename "${target_prop_name}.exe")
+    else ()
+        set(QD_target_executable_filename "${target_prop_name}.app")
+    endif ()
     set(QD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/QtDeployer_deploy_for_${target_executable}.cmake")
 
     configure_file(${QtDeployer_script_file}
@@ -91,17 +101,17 @@ function(QD_add_deployqt target_executable)
             ${QD_all_tag}
             COMMAND ${CMAKE_COMMAND} -DQD_install_mode:BOOL=FALSE -DQD_working_dir:FILEPATH=${CMAKE_CURRENT_BINARY_DIR} -P ${QD_configured_script_file}
             DEPENDS ${target_executable}
-            COMMENT "Run windeployqt for target ${target_executable}")
+            COMMENT "Run windeployqt/macdeployqt for target ${target_executable}")
         set(DLLD_target_name "DLLD_deploy_for_${target_executable}")
         if (TARGET ${DLLD_target_name})
-            # DLLD deploying must run after windeployqt
+            # DLLD deploying must run after windeployqt/macdeployqt
             add_dependencies(${DLLD_target_name}
                 ${custom_target_name})
         endif ()
 
         if (NOT TARGET QD_deploy_all)
             add_custom_target(QD_deploy_all
-                COMMENT "Run windeployqt for all required targets")
+                COMMENT "Run windeployqt/macdeployqt for all required targets")
         endif ()
 
         add_dependencies(QD_deploy_all
@@ -141,7 +151,7 @@ if (NOT ${QD_configure_time})
     #        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
     #    endif ()
 
-    message("Running windeployqt at ${QD_working_dir}")
+    message("Running windeployqt/macdeployqt at ${QD_working_dir}")
     execute_process(COMMAND ${QD_deployqt_exe} ${QD_target_executable_filename} ${QD_flags}
         WORKING_DIRECTORY ${QD_working_dir}
         COMMAND_ERROR_IS_FATAL ANY)
