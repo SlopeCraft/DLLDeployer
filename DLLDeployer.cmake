@@ -333,14 +333,14 @@ function(DLLD_add_deploy target_name)
     set(filename "${target_prop_name}.exe")
 
     set(custom_target_name "DLLD_deploy_for_${target_name}")
-    set(DLLD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/DLLDeployer_deploy_for_${target_name}.cmake")
     set(DLLD_filename ${filename})
-    configure_file(${DLLDeployer_script_file}
-        ${DLLD_configured_script_file}
-        @ONLY)
 
     # Build mode
     if (${DLLD_add_deploy_BUILD_MODE})
+        set(DLLD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/DLLDeployer_build_deploy_for_${target_name}.cmake")
+        configure_file(${DLLDeployer_script_file}
+            ${DLLD_configured_script_file}
+            @ONLY)
         if (${DLLD_add_deploy_ALL})
             set(DLLD_all_tag ALL)
         else ()
@@ -374,6 +374,10 @@ function(DLLD_add_deploy target_name)
     endif ()
     # Install mode
     if (${DLLD_add_deploy_INSTALL_MODE})
+        set(DLLD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/DLLDeployer_install_deploy_for_${target_name}.cmake")
+        configure_file(${DLLDeployer_script_file}
+            ${DLLD_configured_script_file}
+            @ONLY)
 
         if (NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")

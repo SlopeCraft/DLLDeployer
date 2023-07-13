@@ -84,13 +84,14 @@ function(QD_add_deployqt target_executable)
     else ()
         set(QD_target_executable_filename "${target_prop_name}.app")
     endif ()
-    set(QD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/QtDeployer_deploy_for_${target_executable}.cmake")
 
-    configure_file(${QtDeployer_script_file}
-        ${QD_configured_script_file}
-        @ONLY)
 
     if (${QD_add_deployqt_BUILD_MODE})
+        set(QD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/QtDeployer_build_deploy_for_${target_executable}.cmake")
+        configure_file(${QtDeployer_script_file}
+            ${QD_configured_script_file}
+            @ONLY)
+
         if (${APPLE})
             message(WARNING "BUILD_MODE can not be used on apple because no macos bundle will be generated during compilation.")
         endif ()
@@ -128,6 +129,11 @@ function(QD_add_deployqt target_executable)
     endif ()
 
     if (${QD_add_deployqt_INSTALL_MODE})
+        set(QD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/QtDeployer_install_deploy_for_${target_executable}.cmake")
+        configure_file(${QtDeployer_script_file}
+            ${QD_configured_script_file}
+            @ONLY)
+
         if (NOT DEFINED QD_add_deployqt_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")
         endif ()
