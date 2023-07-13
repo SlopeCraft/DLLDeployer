@@ -42,6 +42,7 @@ if (NOT ${DLLD_configure_time})
 
     option(DLLD_install_mode "Run with install mode" ON)                # Whether the script is run during installation
     set(DLLD_install_prefix @DLLD_add_deploy_INSTALL_DESTINATION@)      # The installation prefix of executable
+    set(DLLD_ignore_list @DLLD_add_deploy_IGNORE@)                      # Dll names to be ignored
     #message(WARNING "CMAKE_CXX_COMPILER_ID = ${CMAKE_CXX_COMPILER_ID}")
 else ()
     # These variables are necessary in the configuration time
@@ -62,7 +63,6 @@ function(DLLD_is_dll library_file out_var_name)
     endif ()
 
     set(${out_var_name} OFF PARENT_SCOPE)
-    #message(WARNING "extension = ${extension}")
 endfunction()
 
 
@@ -142,10 +142,6 @@ if (${DLLD_msvc_utils})
     # Get dll dependents of a dll. This function runs directly without recursion
     function(DLLD_get_dll_dependents_norecurse dll_file result_var_name)
         DLLD_is_dll(${dll_file} is_dll)
-        #        if (NOT ${is_dll})
-        #            message(WARNING "${dll_file} is not a dll file, but it was passed to function DLLD_get_dll_dependents_norecurse. Nothing will be done to it.")
-        #            return()
-        #        endif ()
 
         if (NOT DLLD_msvc_dumpbin_exe)
             message(FATAL_ERROR "dumpbin.exe is not found on this computer, but you are using a msvc-like compiler, please install msvc and make sure the environment variables are initialized for msvc.")
@@ -165,13 +161,10 @@ if (${DLLD_msvc_utils})
             endif ()
 
             if (NOT output MATCHES .dll)
-                #message("\"${output}\" doesn't refer to a filename, skip it.")
                 continue()
             endif ()
             list(APPEND result ${output})
         endforeach ()
-
-        #message("result = ${result}")
         set(${result_var_name} ${result} PARENT_SCOPE)
     endfunction(DLLD_get_dll_dependents_norecurse)
 
@@ -201,7 +194,6 @@ else ()
         foreach (output ${outputs})
             string(STRIP ${output} output)
             if (NOT ${output} MATCHES "DLL Name:")
-                #message("\"${output}\" doesn't contains dll information.")
                 continue()
             endif ()
 
@@ -219,13 +211,12 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
     unset(${out_var_name} PARENT_SCOPE)
 
     cmake_parse_arguments(DLLD_get_dll_dependents
-        "RECURSE;SKIP_SYSTEM_DLL" "" "" ${ARGN})
-    #message("DLLD_get_dll_dependents_RECURSE = ${DLLD_get_dll_dependents_RECURSE}")
+        "RECURSE;SKIP_SYSTEM_DLL" "" "IGNORE" ${ARGN})
+    message("DLLD_get_dll_dependents_IGNORE = ${DLLD_get_dll_dependents_IGNORE}")
     cmake_path(GET dll_location PARENT_PATH dll_parent_path)
 
     set(dep_list)
     DLLD_get_dll_dependents_norecurse(${dll_location} temp)
-    #message("Direct deps of ${dll_location} are: ${temp}")
     foreach (dep ${temp})
         DLLD_is_system_dll(${dep} is_system)
 
@@ -233,6 +224,10 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
             continue()
         endif ()
 
+        if(${dep} IN_LIST DLLD_get_dll_dependents_IGNORE)
+            message(STATUS "Ignore ${dep}")
+            continue()
+        endif ()
 
         if (EXISTS "${dll_parent_path}/${dep}")
             set(dep_location "${dll_parent_path}/${dep}")
@@ -251,7 +246,6 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
             endif ()
         endif ()
 
-
         list(APPEND dep_list ${dep_location})
 
         if (${is_system})
@@ -259,24 +253,22 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
         endif ()
 
         if (${DLLD_get_dll_dependents_RECURSE})
-            DLLD_get_dll_dependents(${dep_location} temp_var RECURSE)
+            DLLD_get_dll_dependents(${dep_location} temp_var
+                RECURSE
+                IGNORE ${DLLD_get_dll_dependents_IGNORE})
             list(APPEND dep_list ${temp_var})
         endif ()
     endforeach ()
-    #list(APPEND dep_list ${temp})
 
-    #    if(${DLLD_get_dll_dependents_RECURSE})
-    #        foreach (dep ${temp})
-    #            DLLD_get_dll_dependents(${dep} temp_var RECURSE)
-    #            list(APPEND dep_list ${temp_var})
-    #        endforeach ()
-    #    endif ()
     list(REMOVE_DUPLICATES dep_list)
     set(${out_var_name} ${dep_list} PARENT_SCOPE)
 endfunction()
 
 function(DLLD_get_exe_dependents exe_file result_var_name)
-    DLLD_get_dll_dependents(${exe_file} temp RECURSE)
+    cmake_parse_arguments(DLLD_get_exe_dependents
+        "" "" "IGNORE" ${ARGN})
+    DLLD_get_dll_dependents(${exe_file} temp RECURSE
+        IGNORE ${DLLD_get_exe_dependents_IGNORE})
     set(${result_var_name} ${temp} PARENT_SCOPE)
 endfunction()
 
@@ -289,15 +281,14 @@ function(DLLD_deploy_runtime file_location)
     endif ()
 
     cmake_parse_arguments(DLLD_deploy_runtime
-        "COPY;INSTALL" "DESTINATION" "" ${ARGN})
+        "COPY;INSTALL" "DESTINATION" "IGNORE" ${ARGN})
+    message("DLLD_deploy_runtime_IGNORE = ${DLLD_deploy_runtime_IGNORE}")
 
-    DLLD_get_exe_dependents(${file_location} dependent_list)
-
-    #message(WARNING "dependent_list = ${dependent_list}")
+    DLLD_get_exe_dependents(${file_location} dependent_list
+        IGNORE ${DLLD_deploy_runtime_IGNORE})
 
     foreach (dep ${dependent_list})
         cmake_path(GET dep FILENAME dep_filename)
-        #message(WARNING "Processing ${dep_filename}")
         DLLD_is_system_dll(${dep} is_system)
         if (${is_system})
             continue()
@@ -325,14 +316,16 @@ endfunction()
 # Main API
 function(DLLD_add_deploy target_name)
     cmake_parse_arguments(DLLD_add_deploy
-        "BUILD_MODE;INSTALL_MODE;ALL" "INSTALL_DESTINATION" "" ${ARGN})
+        "BUILD_MODE;INSTALL_MODE;ALL"
+        "INSTALL_DESTINATION"
+        "IGNORE"
+        ${ARGN})
 
     #get_target_property(target_prefix ${target_name} PREFIX)
     get_target_property(target_prop_name ${target_name} NAME)
     #get_target_property(target_suffix ${target_name} PREFIX)
 
     set(filename "${target_prop_name}.exe")
-    #message("The filename is \"${filename}\"")
 
     set(custom_target_name "DLLD_deploy_for_${target_name}")
     set(DLLD_configured_script_file "${CMAKE_CURRENT_BINARY_DIR}/DLLDeployer_deploy_for_${target_name}.cmake")
@@ -376,7 +369,7 @@ function(DLLD_add_deploy target_name)
     endif ()
     # Install mode
     if (${DLLD_add_deploy_INSTALL_MODE})
-        #message("DLLD_add_deploy_INSTALL_DESTINATION = ${DLLD_add_deploy_INSTALL_DESTINATION}")
+
         if (NOT DEFINED DLLD_add_deploy_INSTALL_DESTINATION)
             message(FATAL_ERROR "INSTALL_DESTINATION must be assigned for INSTALL_MODE")
         endif ()
@@ -393,21 +386,15 @@ endfunction()
 
 # This code will execute only during build or installation
 if (NOT ${DLLD_configure_time})
-    #cmake_path(GET DLLD_this_script_file PARENT_PATH parent_path)
-
-    #    if(NOT parent_path STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-    #        message(FATAL_ERROR "This code is expected to run at ${parent_path}, but current running at ${CMAKE_CURRENT_SOURCE_DIR}")
-    #    endif ()
 
     if (NOT ${DLLD_install_mode})
         # Deploy dlls directly in current dir
         message(STATUS "Deploying dlls for ${DLLD_filename}")
-        #message(STATUS "CMAKE_CURRENT_SOURCE_DIR = ${CMAKE_CURRENT_SOURCE_DIR}")
-        #message(WARNING "DLLD_filename = ${DLLD_filename}")
         DLLD_deploy_runtime(${DLLD_filename}
             COPY
             SKIP_SYSTEM_DLL
-            DESTINATION .)
+            DESTINATION .
+            IGNORE ${DLLD_ignore_list})
         return()
     else ()
         # Run this script in another location(installation prefix)

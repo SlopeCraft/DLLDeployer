@@ -45,8 +45,12 @@ QD_add_deployqt(test
     INSTALL_MODE INSTALL_DESTINATION bin
     FLAGS -no-translations)
 
-DLLD_add_deploy(test BUILD_MODE ALL)
-DLLD_add_deploy(test INSTALL_MODE INSTALL_DESTINATION bin)
+#DLLD_add_deploy(test )
+DLLD_add_deploy(test
+    BUILD_MODE ALL
+    INSTALL_MODE
+    INSTALL_DESTINATION bin
+    IGNORE libbz2.dll)
 
 
 include(CPack)
