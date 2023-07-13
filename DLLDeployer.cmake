@@ -212,7 +212,7 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
 
     cmake_parse_arguments(DLLD_get_dll_dependents
         "RECURSE;SKIP_SYSTEM_DLL" "" "IGNORE" ${ARGN})
-    message("DLLD_get_dll_dependents_IGNORE = ${DLLD_get_dll_dependents_IGNORE}")
+    #message("DLLD_get_dll_dependents_IGNORE = ${DLLD_get_dll_dependents_IGNORE}")
     cmake_path(GET dll_location PARENT_PATH dll_parent_path)
 
     set(dep_list)
@@ -224,7 +224,7 @@ function(DLLD_get_dll_dependents dll_location out_var_name)
             continue()
         endif ()
 
-        if(${dep} IN_LIST DLLD_get_dll_dependents_IGNORE)
+        if (${dep} IN_LIST DLLD_get_dll_dependents_IGNORE)
             message(STATUS "Ignore ${dep}")
             continue()
         endif ()
@@ -282,7 +282,7 @@ function(DLLD_deploy_runtime file_location)
 
     cmake_parse_arguments(DLLD_deploy_runtime
         "COPY;INSTALL" "DESTINATION" "IGNORE" ${ARGN})
-    message("DLLD_deploy_runtime_IGNORE = ${DLLD_deploy_runtime_IGNORE}")
+    #message("DLLD_deploy_runtime_IGNORE = ${DLLD_deploy_runtime_IGNORE}")
 
     DLLD_get_exe_dependents(${file_location} dependent_list
         IGNORE ${DLLD_deploy_runtime_IGNORE})
