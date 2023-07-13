@@ -30,7 +30,8 @@ if(${Qt6_FOUND})
 endif ()
 
 install(TARGETS test
-    RUNTIME DESTINATION bin)
+    RUNTIME DESTINATION bin
+    BUNDLE DESTINATION bin)
 
 if(${Qt6_FOUND})
 QD_add_deployqt(test

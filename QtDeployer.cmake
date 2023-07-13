@@ -143,14 +143,15 @@ if (NOT ${QD_configure_time})
     if (QD_install_mode)
         message(STATUS "Running ${QD_this_script_file} indirectly...")
         execute_process(COMMAND ${CMAKE_COMMAND} -DQD_install_mode:BOOL=OFF -DQD_working_dir:FILEPATH=${CMAKE_INSTALL_PREFIX}/${QD_install_prefix} -P ${QD_this_script_file}
+            WORKING_DIRECTORY ${QD_working_dir}
             COMMAND_ERROR_IS_FATAL ANY)
         return()
     endif ()
 
     set(exe_location "${QD_working_dir}/${QD_target_executable_filename}")
-    #    if (NOT EXISTS ${exe_location})
-    #        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
-    #    endif ()
+    if (NOT EXISTS ${exe_location})
+        message(FATAL_ERROR "\"${exe_location}\" doesn't exist.")
+    endif ()
 
     message("Running windeployqt/macdeployqt at ${QD_working_dir}")
     execute_process(COMMAND ${QD_deployqt_exe} ${QD_target_executable_filename} ${QD_flags}
