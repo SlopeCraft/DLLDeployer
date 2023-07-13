@@ -54,5 +54,5 @@ if(${WIN32})
         INSTALL_DESTINATION bin)
 endif ()
 
-
+set(CPACK_PACKAGE_NAME "${PROJECT_NAME}_${CMAKE_CXX_COMPILER_ID}")
 include(CPack)
