@@ -8,7 +8,7 @@ else ()
 endif ()
 
 
-if (NOT (${WIN32} OR ${Darwin}))
+if (NOT (WIN32 OR Darwin))
     message(WARNING "This project is designed to deploy dll on windows or macOS.")
     return()
 endif ()
