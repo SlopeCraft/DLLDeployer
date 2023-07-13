@@ -38,9 +38,9 @@ install(TARGETS test
 
 if(${Qt6_FOUND})
     if(${APPLE})
-#        QD_add_deployqt(test
-#            INSTALL_MODE INSTALL_DESTINATION bin
-#            FLAGS -no-translations)
+        QD_add_deployqt(test
+            INSTALL_MODE INSTALL_DESTINATION bin
+            FLAGS -no-translations)
     else ()
         QD_add_deployqt(test
             BUILD_MODE ALL
